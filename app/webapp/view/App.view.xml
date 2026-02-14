@@ -1,0 +1,187 @@
+<mvc:View
+    controllerName="sap.cap.ai.chat.controller.App"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    height="100%"
+>
+    <App id="chatApp">
+        <Page
+            showHeader="true"
+            enableScrolling="false"
+            class="sapUiNoContentPadding"
+        >
+            <customHeader>
+                <Bar>
+                    <contentLeft>
+                        <Title
+                            text="OpenCAP AI Chat Studio"
+                            class="sapUiSmallMarginBegin"
+                        />
+                    </contentLeft>
+                    <contentRight>
+                        <Button
+                            icon="sap-icon://add"
+                            text="New Chat"
+                            press=".onNewChat"
+                        />
+                        <Button
+                            icon="sap-icon://settings"
+                            press=".onOpenSettings"
+                        />
+                        <Avatar
+                            src="https://ui5.sap.com/test-resources/sap/f/images/Woman_avatar_01.png"
+                            class="sapUiSmallMarginEnd"
+                            displaySize="S"
+                            press=".onAvatarPress"
+                        />
+                    </contentRight>
+                </Bar>
+            </customHeader>
+            <content>
+                <l:Splitter height="100%">
+                    <List
+                        id="conversationList"
+                        headerText="Conversations"
+                        mode="SingleSelectMaster"
+                        selectionChange=".onConversationSelect"
+                        items="{
+                            path: '/Conversations',
+                            sorter: { path: 'modifiedAt', descending: true }
+                        }"
+                    >
+                        <layoutData>
+                            <l:SplitterLayoutData size="25%" />
+                        </layoutData>
+                        <items>
+                            <CustomListItem type="Active">
+                                <HBox
+                                    alignItems="Center"
+                                    justifyContent="SpaceBetween"
+                                    class="sapUiSmallMargin"
+                                >
+                                    <VBox>
+                                        <Title text="{title}" />
+                                        <Text
+                                            text="{model}"
+                                            class="italicText"
+                                        />
+                                    </VBox>
+                                    <HBox>
+                                        <Button
+                                            icon="sap-icon://edit"
+                                            type="Transparent"
+                                            press=".onEditTitle"
+                                        />
+                                        <Button
+                                            icon="sap-icon://delete"
+                                            type="Transparent"
+                                            press=".onDeleteConversation"
+                                        />
+                                    </HBox>
+                                </HBox>
+                            </CustomListItem>
+                        </items>
+                    </List>
+                    <Page id="chatPage" showHeader="false" showFooter="true">
+                        <layoutData>
+                            <l:SplitterLayoutData size="75%" />
+                        </layoutData>
+                        <content>
+                            <ScrollContainer
+                                id="scrollContainer"
+                                height="100%"
+                                width="100%"
+                                vertical="true"
+                                horizontal="false"
+                            >
+                                <VBox>
+                                    <List
+                                        id="messageList"
+                                        showSeparators="None"
+                                        noDataText="No messages yet. Start a conversation!"
+                                        class="sapUiSmallMarginTop"
+                                    >
+                                        <!-- Bound in Controller -->
+                                    </List>
+                                    <!-- Streaming/Thinking Bubble -->
+                                    <HBox
+                                        visible="{ui>/isStreaming}"
+                                        class="sapUiSmallMargin"
+                                    >
+                                        <VBox
+                                            class="chatBubble assistantBubble"
+                                        >
+                                            <HBox
+                                                justifyContent="SpaceBetween"
+                                                alignItems="Center"
+                                                width="100%"
+                                            >
+                                                <Label
+                                                    text="Assistant"
+                                                    design="Bold"
+                                                />
+                                                <Button
+                                                    icon="sap-icon://stop"
+                                                    type="Transparent"
+                                                    press=".onStopStreaming"
+                                                />
+                                            </HBox>
+                                            <Text
+                                                text="{ui>/streamingText}"
+                                                wrapping="true"
+                                            />
+                                            <HBox
+                                                alignItems="Center"
+                                                class="sapUiTinyMarginTop"
+                                            >
+                                                <BusyIndicator
+                                                    class="sapUiTinyMarginEnd"
+                                                />
+                                                <Text
+                                                    text="AI is typing..."
+                                                    fontStyle="Italic"
+                                                    visible="{= ${ui>/streamingText} === '' }"
+                                                />
+                                            </HBox>
+                                        </VBox>
+                                    </HBox>
+                                </VBox>
+                            </ScrollContainer>
+                        </content>
+                        <footer>
+                            <Toolbar
+                                height="auto"
+                                class="sapUiTinyMarginTopBottom"
+                            >
+                                <Button
+                                    id="modelSelectButton"
+                                    text="sap-abap-1"
+                                    press=".onSelectModel"
+                                    type="Transparent"
+                                />
+                                <TextArea
+                                    id="chatInput"
+                                    rows="1"
+                                    width="100%"
+                                    placeholder="Type your message here..."
+                                    growing="true"
+                                    growingMaxLines="5"
+                                />
+                                <Button
+                                    id="sendButton"
+                                    enabled="{= !${ui>/isStreaming} }"
+                                    icon="sap-icon://paper-plane"
+                                    type="Emphasized"
+                                    press=".onSendMessage"
+                                />
+                            </Toolbar>
+                        </footer>
+                    </Page>
+                </l:Splitter>
+            </content>
+        </Page>
+    </App>
+</mvc:View>

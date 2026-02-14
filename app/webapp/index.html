@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>OpenCAP AI Chat Studio</title>
+        <script
+            id="sap-ui-bootstrap"
+            src="https://ui5.sap.com/resources/sap-ui-core.js"
+            data-sap-ui-theme="sap_horizon"
+            data-sap-ui-libs="sap.m, sap.f, sap.ui.layout"
+            data-sap-ui-compatVersion="edge"
+            data-sap-ui-async="true"
+            data-sap-ui-onInit="module:sap/ui/core/ComponentSupport"
+            data-sap-ui-resourceroots='{"sap.cap.ai.chat": "./"}'
+        ></script>
+        <style>
+            html,
+            body,
+            #content,
+            #container,
+            #container-chat {
+                height: 100% !important;
+                margin: 0;
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+    <body class="sapUiBody" id="content">
+        <div
+            data-sap-ui-component
+            data-name="sap.cap.ai.chat"
+            data-id="container"
+            data-settings='{"id" : "chat"}'
+        ></div>
+    </body>
+</html>

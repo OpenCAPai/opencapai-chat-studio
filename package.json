@@ -1,0 +1,41 @@
+{
+  "name": "opencapai-chat-studio",
+  "version": "1.0.0",
+  "description": "A professional AI Chat Studio built with SAP CAP and SAPUI5, featuring multi-model support and streaming simulation.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opencapai/opencapai-chat-studio.git"
+  },
+  "keywords": [
+    "sap",
+    "cap",
+    "ui5",
+    "ai",
+    "llm",
+    "chat",
+    "btp"
+  ],
+  "author": "OpenCAP AI Community",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@sap/cds": "^9.7.1",
+    "@sap/cds-fiori": "^2.2.0",
+    "@cap-js/sqlite": "^2.1.3",
+    "@sap-ai-sdk/orchestration": "^2.6.0",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@sap/cds-dk": "^9.7.2"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds watch --in-memory"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sql"
+      }
+    }
+  }
+}
