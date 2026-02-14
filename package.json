@@ -1,6 +1,6 @@
 {
   "name": "opencapai-chat-studio",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A professional AI Chat Studio built with SAP CAP and SAPUI5, featuring multi-model support and streaming simulation.",
   "repository": {
     "type": "git",
