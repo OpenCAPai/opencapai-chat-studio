@@ -1,0 +1,48 @@
+{
+  "xsappname": "opencapai-chat-studio",
+  "tenant-mode": "dedicated",
+  "description": "Security profile for OpenCAP AI Chat Studio",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.User",
+      "description": "User access to chat functionality"
+    },
+    {
+      "name": "$XSAPPNAME.Admin",
+      "description": "Administrator access to manage configurations"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "User",
+      "description": "Standard user role for chat access",
+      "scope-references": [
+        "$XSAPPNAME.User"
+      ]
+    },
+    {
+      "name": "Admin",
+      "description": "Administrator role with full access",
+      "scope-references": [
+        "$XSAPPNAME.User",
+        "$XSAPPNAME.Admin"
+      ]
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "OpenCAP_AI_Chat_User",
+      "description": "Chat User Role Collection",
+      "role-template-references": [
+        "$XSAPPNAME.User"
+      ]
+    },
+    {
+      "name": "OpenCAP_AI_Chat_Admin",
+      "description": "Chat Administrator Role Collection",
+      "role-template-references": [
+        "$XSAPPNAME.Admin"
+      ]
+    }
+  ]
+}

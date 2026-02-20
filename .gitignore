@@ -1,10 +1,74 @@
+# Node modules
 node_modules/
-gen/
-db/*.db
-db/data/*.csv
-.env
-default-env.json
-_out/
-.DS_Store
-*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+default-env.json
+
+# Build outputs
+gen/
+dist/
+mta_archives/
+*.mtar
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+db.sqlite
+db.*
+*.csv
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# SAP specific
+.cdsrc-private.json
+.cdsrc.json
+connection.properties
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Coverage and test reports
+coverage/
+.nyc_output/
+test-results/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Build Tools
+.mta/
+resources/
+
+# Credentials and certificates
+*.pem
+*.key
+*.cert
+*.p12
+*.jks
+
+# SAP HANA deployment artifacts
+src/
+deployer/
+.che/
+.pipeline/

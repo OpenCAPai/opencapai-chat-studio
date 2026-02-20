@@ -12,27 +12,32 @@
             showHeader="true"
             enableScrolling="false"
             class="sapUiNoContentPadding"
+            id="chatApp-page"
         >
             <customHeader>
-                <Bar>
+                <Bar id="chatApp-page-bar">
                     <contentLeft>
-                        <Title
+                        <Title id="chatApp-page-title"
                             text="OpenCAP AI Chat Studio"
                             class="sapUiSmallMarginBegin"
                         />
                     </contentLeft>
                     <contentRight>
                         <Button
+                        id="chatApp-page-button-new"
                             icon="sap-icon://add"
                             text="New Chat"
                             press=".onNewChat"
                         />
                         <Button
+                        id="chatApp-page-button-setting"
                             icon="sap-icon://settings"
                             press=".onOpenSettings"
                         />
                         <Avatar
-                            src="https://ui5.sap.com/test-resources/sap/f/images/Woman_avatar_01.png"
+                        id="chatApp-page-button-avatar"
+                            initials="{= ${ui>/userInfo/name} ? ${ui>/userInfo/name}.substring(0, 2).toUpperCase() : '??' }"
+                            backgroundColor="Accent6"
                             class="sapUiSmallMarginEnd"
                             displaySize="S"
                             press=".onAvatarPress"
@@ -41,7 +46,7 @@
                 </Bar>
             </customHeader>
             <content>
-                <l:Splitter height="100%">
+                <l:Splitter height="100%" id="chatApp-page-button-spiltter">
                     <List
                         id="conversationList"
                         headerText="Conversations"
@@ -53,29 +58,29 @@
                         }"
                     >
                         <layoutData>
-                            <l:SplitterLayoutData size="25%" />
+                            <l:SplitterLayoutData size="25%" id="chatApp-page-button-splitter-layout" />
                         </layoutData>
                         <items>
-                            <CustomListItem type="Active">
-                                <HBox
+                            <CustomListItem type="Active" id="chatApp-page-button-custome-line">
+                                <HBox id="chatApp-page-button-hbox"
                                     alignItems="Center"
                                     justifyContent="SpaceBetween"
                                     class="sapUiSmallMargin"
                                 >
-                                    <VBox>
-                                        <Title text="{title}" />
-                                        <Text
+                                    <VBox id="_IDGenVBox1">
+                                        <Title id="_IDGenTitle" text="{title}" />
+                                        <Text id="_IDGenText"
                                             text="{model}"
                                             class="italicText"
                                         />
                                     </VBox>
-                                    <HBox>
-                                        <Button
+                                    <HBox id="_IDGenHBox">
+                                        <Button id="_IDGenButton"
                                             icon="sap-icon://edit"
                                             type="Transparent"
                                             press=".onEditTitle"
                                         />
-                                        <Button
+                                        <Button id="_IDGenButton1"
                                             icon="sap-icon://delete"
                                             type="Transparent"
                                             press=".onDeleteConversation"
@@ -87,7 +92,7 @@
                     </List>
                     <Page id="chatPage" showHeader="false" showFooter="true">
                         <layoutData>
-                            <l:SplitterLayoutData size="75%" />
+                            <l:SplitterLayoutData id="_IDGenSplitterLayoutData" size="75%" />
                         </layoutData>
                         <content>
                             <ScrollContainer
@@ -97,53 +102,49 @@
                                 vertical="true"
                                 horizontal="false"
                             >
-                                <VBox>
+                                <VBox id="_IDGenVBox2">
                                     <List
                                         id="messageList"
                                         showSeparators="None"
                                         noDataText="No messages yet. Start a conversation!"
                                         class="sapUiSmallMarginTop"
                                     >
-                                        <!-- Bound in Controller -->
                                     </List>
-                                    <!-- Streaming/Thinking Bubble -->
-                                    <HBox
+                                    <HBox id="_IDGenHBox1"
                                         visible="{ui>/isStreaming}"
                                         class="sapUiSmallMargin"
                                     >
-                                        <VBox
-                                            class="chatBubble assistantBubble"
+                                        <VBox id="_IDGenVBox3"
+                                            class="chatBubble assistantBubble streamingBubble"
                                         >
-                                            <HBox
+                                            <HBox id="_IDGenHBox2"
                                                 justifyContent="SpaceBetween"
                                                 alignItems="Center"
                                                 width="100%"
                                             >
-                                                <Label
-                                                    text="Assistant"
+                                                <Label id="_IDGenLabel"
+                                                    text="assistant"
                                                     design="Bold"
                                                 />
-                                                <Button
+                                                <Button id="_IDGenButton2"
                                                     icon="sap-icon://stop"
                                                     type="Transparent"
                                                     press=".onStopStreaming"
                                                 />
                                             </HBox>
-                                            <Text
-                                                text="{ui>/streamingText}"
-                                                wrapping="true"
+                                            <FormattedText id="_IDGenText1"
+                                                htmlText="{ui>/streamingText}"
                                             />
-                                            <HBox
+                                            <HBox id="_IDGenHBox3"
                                                 alignItems="Center"
                                                 class="sapUiTinyMarginTop"
+                                                visible="{= ${ui>/streamingText} === '' }"
                                             >
-                                                <BusyIndicator
+                                                <BusyIndicator id="_IDGenBusyIndicator"
                                                     class="sapUiTinyMarginEnd"
                                                 />
-                                                <Text
-                                                    text="AI is typing..."
-                                                    fontStyle="Italic"
-                                                    visible="{= ${ui>/streamingText} === '' }"
+                                                <FormattedText id="_IDGenFormattedText"
+                                                    htmlText="&lt;i&gt;AI is thinking...&lt;/i&gt;"
                                                 />
                                             </HBox>
                                         </VBox>
@@ -152,13 +153,13 @@
                             </ScrollContainer>
                         </content>
                         <footer>
-                            <Toolbar
+                            <Toolbar id="_IDGenToolbar"
                                 height="auto"
                                 class="sapUiTinyMarginTopBottom"
                             >
                                 <Button
                                     id="modelSelectButton"
-                                    text="sap-abap-1"
+                                    text="No model"
                                     press=".onSelectModel"
                                     type="Transparent"
                                 />

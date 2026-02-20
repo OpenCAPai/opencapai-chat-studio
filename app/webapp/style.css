@@ -50,3 +50,149 @@
 .sapMLIB.sapMLIBTypeActive:not(.sapMLIBSel):not(.sapMLIBShowSeparator) {
     background-color: transparent !important;
 }
+
+.streamingBubble {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.streamingBubble .sapMFormattedText::after {
+    content: '▊';
+    animation: blink 1s infinite;
+    margin-left: 2px;
+}
+
+@keyframes blink {
+
+    0%,
+    49% {
+        opacity: 1;
+    }
+
+    50%,
+    100% {
+        opacity: 0;
+    }
+}
+
+.streamingBubble .sapMFormattedText {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.assistantBubble .sapMFormattedText h1,
+.assistantBubble .sapMFormattedText h2,
+.assistantBubble .sapMFormattedText h3,
+.assistantBubble .sapMFormattedText h4,
+.assistantBubble .sapMFormattedText h5,
+.assistantBubble .sapMFormattedText h6 {
+    margin: 0.5em 0 0.3em 0;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.assistantBubble .sapMFormattedText h1 {
+    font-size: 1.5em;
+}
+
+.assistantBubble .sapMFormattedText h2 {
+    font-size: 1.3em;
+}
+
+.assistantBubble .sapMFormattedText h3 {
+    font-size: 1.1em;
+}
+
+.assistantBubble .sapMFormattedText p {
+    margin: 0.5em 0;
+    line-height: 1.6;
+}
+
+.assistantBubble .sapMFormattedText code {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+}
+
+.assistantBubble .sapMFormattedText pre {
+    background-color: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 12px;
+    overflow-x: auto;
+    margin: 0.5em 0;
+}
+
+.assistantBubble .sapMFormattedText pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-size: 0.85em;
+    line-height: 1.45;
+}
+
+.assistantBubble .sapMFormattedText ul,
+.assistantBubble .sapMFormattedText ol {
+    margin: 0.5em 0;
+    padding-left: 2em;
+}
+
+.assistantBubble .sapMFormattedText li {
+    margin: 0.25em 0;
+    line-height: 1.6;
+}
+
+.assistantBubble .sapMFormattedText blockquote {
+    border-left: 4px solid #d0d7de;
+    padding-left: 1em;
+    margin: 0.5em 0;
+    color: #57606a;
+    font-style: italic;
+}
+
+.assistantBubble .sapMFormattedText a {
+    color: #0969da;
+    text-decoration: none;
+}
+
+.assistantBubble .sapMFormattedText a:hover {
+    text-decoration: underline;
+}
+
+.assistantBubble .sapMFormattedText strong {
+    font-weight: 600;
+}
+
+.assistantBubble .sapMFormattedText em {
+    font-style: italic;
+}
+
+.assistantBubble .sapMFormattedText table {
+    border-collapse: collapse;
+    margin: 0.5em 0;
+    width: 100%;
+}
+
+.assistantBubble .sapMFormattedText th,
+.assistantBubble .sapMFormattedText td {
+    border: 1px solid #d0d7de;
+    padding: 6px 13px;
+}
+
+.assistantBubble .sapMFormattedText th {
+    background-color: #f6f8fa;
+    font-weight: 600;
+}

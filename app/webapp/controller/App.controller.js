@@ -18,6 +18,7 @@ sap.ui.define(
     "sap/ui/model/json/JSONModel",
     "sap/m/ActionSheet",
     "sap/ui/core/CustomData",
+    "sap/ui/core/library",
   ],
   function (
     Controller,
@@ -38,35 +39,37 @@ sap.ui.define(
     JSONModel,
     ActionSheet,
     CustomData,
+    coreLibrary,
   ) {
     "use strict";
 
     return Controller.extend("sap.cap.ai.chat.controller.App", {
       onInit: function () {
         this._selectedConversationId = null;
-        this._selectedModel = "sap-abap-1";
+        this._selectedModel = null;
         this._streamingInterval = null;
 
         const oUiModel = new JSONModel({
           isStreaming: false,
           streamingText: "",
           currentTheme: "system",
-          availableModels: [
-            {
-              key: "sap-abap-1",
-              name: "SAP ABAP Llama",
-              deploymentUrl: "https://api.ai.sap/v2/deployment/d1",
-              systemPrompt: "You are a specialized ABAP assistant.",
-            },
-            {
-              key: "gpt-4",
-              name: "GPT-4 Turbo",
-              deploymentUrl: "https://api.ai.sap/v2/deployment/d2",
-              systemPrompt: "You are a helpful general assistant.",
-            },
-          ],
+          aiCoreConfig: {
+            endpoint: "",
+            resourceGroup: "",
+            token: "",
+          },
+          availableModels: [],
+          userInfo: {
+            id: "",
+            name: "Loading...",
+            email: "",
+            roles: []
+          }
         });
         this.getView().setModel(oUiModel, "ui");
+        this._loadUserInfo();
+        this._loadAICoreConfig();
+        this._loadModels();
         this._applySystemTheme();
 
         window
@@ -81,6 +84,47 @@ sap.ui.define(
           });
       },
 
+      _loadUserInfo: function () {
+        const oUiModel = this.getView().getModel("ui");
+
+        fetch("/odata/v4/chat/getUserInfo")
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error("Failed to fetch user info");
+            }
+            return res.json();
+          })
+          .then((data) => {
+            if (data.value) {
+              oUiModel.setProperty("/userInfo", data.value);
+            } else if (data) {
+              oUiModel.setProperty("/userInfo", data);
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to load user info:", err);
+            oUiModel.setProperty("/userInfo", {
+              id: "error",
+              name: "Error loading user",
+              email: "",
+              roles: []
+            });
+          });
+      },
+
+      _loadModels: function () {
+        const oUiModel = this.getView().getModel("ui");
+
+        fetch("/odata/v4/chat/Models")
+          .then((res) => res.json())
+          .then((data) => {
+            oUiModel.setProperty("/availableModels", data.value || []);
+          })
+          .catch((err) => {
+            console.error("Failed to load models:", err);
+          });
+      },
+
       _applySystemTheme: function () {
         const isDark = window.matchMedia(
           "(prefers-color-scheme: dark)",
@@ -88,36 +132,137 @@ sap.ui.define(
         Configuration.setTheme(isDark ? "sap_horizon_dark" : "sap_horizon");
       },
 
+      _loadAICoreConfig: function () {
+        const oUiModel = this.getView().getModel("ui");
+        fetch("/odata/v4/chat/getAICoreConfig")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.value) {
+              oUiModel.setProperty("/aiCoreConfig", data.value);
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to load AI Core config:", err);
+          });
+      },
+
+      _saveAICoreConfig: function (oConfig) {
+        const oUiModel = this.getView().getModel("ui");
+        fetch("/odata/v4/chat/saveAICoreConfig", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(oConfig),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.value) {
+              oUiModel.setProperty("/aiCoreConfig", data.value);
+              MessageToast.show("AI Core configuration saved successfully");
+            }
+          })
+          .catch((err) => {
+            MessageToast.show("Failed to save AI Core configuration");
+            console.error("Failed to save AI Core config:", err);
+          });
+      },
+
       onAvatarPress: function (oEvent) {
         const oButton = oEvent.getSource();
-        if (!this._oActionSheet) {
-          this._oActionSheet = new ActionSheet({
-            title: "Account Settings",
-            showCancelButton: true,
-            buttons: [
-              new Button({
-                text: "Profile Settings",
-                icon: "sap-icon://settings",
-              }),
-              new Button({
-                text: "Logout",
-                icon: "sap-icon://log",
-                type: "Reject",
-                press: () => MessageToast.show("Logging out..."),
-              }),
-            ],
-          });
-          this.getView().addDependent(this._oActionSheet);
-        }
-        this._oActionSheet.openBy(oButton);
+        const oUiModel = this.getView().getModel("ui");
+        const oUserInfo = oUiModel.getProperty("/userInfo");
+
+        const oDialog = new Dialog({
+          title: "User Profile",
+          contentWidth: "400px",
+          content: [
+            new VBox({
+              items: [
+                new HBox({
+                  justifyContent: "Center",
+                  items: [
+                    new sap.m.Avatar({
+                      displaySize: "XL",
+                      initials: oUserInfo.name ? oUserInfo.name.substring(0, 2).toUpperCase() : "??",
+                      backgroundColor: "Accent6"
+                    })
+                  ]
+                }).addStyleClass("sapUiSmallMarginBottom"),
+                new VBox({
+                  items: [
+                    new Label({ text: "Name", design: "Bold" }),
+                    new Text({ text: "{ui>/userInfo/name}" }).addStyleClass("sapUiSmallMarginBottom"),
+                    new Label({ text: "Email", design: "Bold" }),
+                    new Text({ text: "{ui>/userInfo/email}" }).addStyleClass("sapUiSmallMarginBottom"),
+                    new Label({ text: "User ID", design: "Bold" }),
+                    new Text({ text: "{ui>/userInfo/id}" }).addStyleClass("sapUiSmallMarginBottom"),
+                    new Label({ text: "Roles", design: "Bold" }),
+                    new Text({
+                      text: {
+                        path: "ui>/userInfo/roles",
+                        formatter: function (aRoles) {
+                          return aRoles && aRoles.length > 0 ? aRoles.join(", ") : "No roles assigned";
+                        }
+                      }
+                    })
+                  ]
+                })
+              ]
+            }).addStyleClass("sapUiSmallMargin")
+          ],
+          beginButton: new Button({
+            text: "Close",
+            press: function () {
+              oDialog.close();
+            }
+          })
+        });
+
+        this.getView().addDependent(oDialog);
+        oDialog.open();
       },
 
       onOpenSettings: function () {
         const oUiModel = this.getView().getModel("ui");
+
+        const oBearerTokenInput = new TextArea({
+          value: "{ui>/aiCoreConfig/token}",
+          placeholder: "Bearer Token (JWT)",
+          rows: 4,
+          width: "100%",
+        });
+
+        const oDeploymentUrlInput = new Input({
+          value: "https://api.ai.prod-eu20.westeurope.azure.ml.hana.ondemand.com/v2/inference/deployments/da814b66ca186364/v2/completion",
+          placeholder: "Deployment URL",
+          width: "100%",
+        });
+
         const oDialog = new Dialog({
           title: "Settings",
-          contentWidth: "500px",
+          contentWidth: "600px",
           content: [
+            new Label({
+              text: "AI Core Bearer Token",
+              design: "Bold",
+            }).addStyleClass("sapUiSmallMarginTop"),
+            new VBox({
+              items: [
+                new Label({ text: "Authentication Token" }),
+                oBearerTokenInput,
+                new Button({
+                  text: "Save Token",
+                  type: "Emphasized",
+                  press: () => {
+                    const oConfig = {
+                      endpoint: "",
+                      resourceGroup: "default",
+                      token: oBearerTokenInput.getValue(),
+                    };
+                    this._saveAICoreConfig(oConfig);
+                  },
+                }).addStyleClass("sapUiSmallMarginTop"),
+              ],
+            }).addStyleClass("sapUiSmallMargin"),
             new Label({ text: "Appearance", design: "Bold" }).addStyleClass(
               "sapUiSmallMarginTop",
             ),
@@ -181,20 +326,29 @@ sap.ui.define(
                                 icon: "sap-icon://delete",
                                 type: "Transparent",
                                 press: (oE) => {
-                                  const aModels =
-                                    oUiModel.getProperty("/availableModels");
-                                  const iIdx = parseInt(
-                                    oE
-                                      .getSource()
-                                      .getBindingContext("ui")
-                                      .getPath()
-                                      .split("/")
-                                      .pop(),
-                                  );
-                                  aModels.splice(iIdx, 1);
-                                  oUiModel.setProperty(
-                                    "/availableModels",
-                                    aModels,
+                                  const oCtx = oE
+                                    .getSource()
+                                    .getBindingContext("ui");
+                                  const sID = oCtx.getProperty("ID");
+                                  const sName = oCtx.getProperty("name");
+
+                                  sap.m.MessageBox.confirm(
+                                    `Are you sure you want to delete the model "${sName}"?`,
+                                    {
+                                      onClose: (oAction) => {
+                                        if (oAction === sap.m.MessageBox.Action.OK) {
+                                          const oModel = this.getView().getModel();
+                                          const oDeleteAction = oModel.bindContext("/deleteModel(...)");
+                                          oDeleteAction.setParameter("ID", sID);
+                                          oDeleteAction.execute().then(() => {
+                                            MessageToast.show("Model deleted successfully");
+                                            this._loadModels();
+                                          }).catch((oError) => {
+                                            MessageToast.show("Error deleting model: " + oError.message);
+                                          });
+                                        }
+                                      },
+                                    }
                                   );
                                 },
                               }),
@@ -204,13 +358,11 @@ sap.ui.define(
                       }),
                       new Text({
                         text: "URL: {ui>deploymentUrl}",
-                        class: "sapUiTinyMarginTop",
-                      }),
+                      }).addStyleClass("sapUiTinyMarginTop"),
                       new Text({
                         text: "Prompt: {ui>systemPrompt}",
                         wrapping: false,
-                        class: "sapUiTinyMarginTop",
-                      }),
+                      }).addStyleClass("sapUiTinyMarginTop"),
                     ],
                   }).addStyleClass("sapUiSmallMargin"),
                 }),
@@ -233,11 +385,11 @@ sap.ui.define(
 
       _onOpenModelDialog: function (oContext) {
         const bEdit = !!oContext;
-        const oUiModel = this.getView().getModel("ui");
+        const oModel = this.getView().getModel();
 
         const oKey = new Input({
-          placeholder: "Model Key",
-          value: bEdit ? oContext.getProperty("key") : "",
+          placeholder: "Model Key (e.g., gpt-4)",
+          value: bEdit ? oContext.getProperty("modelKey") : "",
           editable: !bEdit,
         });
         const oName = new Input({
@@ -249,19 +401,64 @@ sap.ui.define(
           value: bEdit ? oContext.getProperty("deploymentUrl") : "",
         });
         const oPrompt = new TextArea({
-          placeholder: "System Prompt",
+          placeholder: "System Prompt (optional)",
           rows: 3,
           width: "100%",
           value: bEdit ? oContext.getProperty("systemPrompt") : "",
         });
 
+        const oAuthTypeSelect = new sap.m.Select({
+          selectedKey: bEdit ? oContext.getProperty("authType") : "bearer",
+          items: [
+            new sap.ui.core.Item({ key: "bearer", text: "Bearer Token (AI Core)" }),
+            new sap.ui.core.Item({ key: "oauth2", text: "OAuth2 Client Credentials" }),
+            new sap.ui.core.Item({ key: "none", text: "No Authentication" }),
+          ],
+          change: (oEvent) => {
+            const sAuthType = oEvent.getParameter("selectedItem").getKey();
+            oOAuth2Box.setVisible(sAuthType === "oauth2");
+          },
+        });
+
+        const oTokenUrl = new Input({
+          placeholder: "Token URL (e.g., https://auth.example.com/oauth/token)",
+          value: bEdit ? oContext.getProperty("tokenUrl") : "",
+        });
+        const oClientId = new Input({
+          placeholder: "Client ID",
+          value: bEdit ? oContext.getProperty("clientId") : "",
+        });
+        const oClientSecret = new Input({
+          placeholder: bEdit ? "Client Secret (leave empty to keep current)" : "Client Secret",
+          type: "Password",
+          value: "",
+        });
+        const oScope = new Input({
+          placeholder: "Scope (optional)",
+          value: bEdit ? oContext.getProperty("scope") : "",
+        });
+
+        const oOAuth2Box = new VBox({
+          visible: bEdit ? oContext.getProperty("authType") === "oauth2" : false,
+          items: [
+            new Label({ text: "Token URL" }),
+            oTokenUrl,
+            new Label({ text: "Client ID" }),
+            oClientId,
+            new Label({ text: "Client Secret" }),
+            oClientSecret,
+            new Label({ text: "Scope" }),
+            oScope,
+          ],
+        }).addStyleClass("sapUiSmallMarginTop");
+
         const oDialog = new Dialog({
           title: bEdit ? "Edit Model" : "Add New AI Model",
-          contentWidth: "400px",
+          contentWidth: "500px",
           content: [
             new VBox({
               items: [
-                new Label({ text: "ID (Key)" }),
+                new Label({ text: "Model Key" }),
                 oKey,
                 new Label({ text: "Display Name" }),
                 oName,
@@ -269,30 +466,73 @@ sap.ui.define(
                 oUrl,
                 new Label({ text: "System Prompt" }),
                 oPrompt,
+                new Label({ text: "Authentication Type" }),
+                oAuthTypeSelect,
+                oOAuth2Box,
               ],
             }).addStyleClass("sapUiSmallMargin"),
           ],
           beginButton: new Button({
             text: bEdit ? "Save" : "Add",
+            type: "Emphasized",
             press: () => {
-              const aModels = oUiModel.getProperty("/availableModels");
+              const sAuthType = oAuthTypeSelect.getSelectedKey();
               const oData = {
                 key: oKey.getValue(),
                 name: oName.getValue(),
                 deploymentUrl: oUrl.getValue(),
                 systemPrompt: oPrompt.getValue(),
+                authType: sAuthType,
+                tokenUrl: sAuthType === "oauth2" ? oTokenUrl.getValue() : "",
+                clientId: sAuthType === "oauth2" ? oClientId.getValue() : "",
+                clientSecret: sAuthType === "oauth2" ? oClientSecret.getValue() : "",
+                scope: sAuthType === "oauth2" ? oScope.getValue() : "",
               };
 
-              if (bEdit) {
-                const iIdx = parseInt(oContext.getPath().split("/").pop());
-                aModels[iIdx] = oData;
-              } else {
-                aModels.push(oData);
-              }
+              oDialog.setBusy(true);
 
-              oUiModel.setProperty("/availableModels", aModels);
-              oDialog.close();
-              MessageToast.show(bEdit ? "Model updated" : "Model added");
+              if (bEdit) {
+                const sID = oContext.getProperty("ID");
+                const oAction = oModel.bindContext("/updateModel(...)");
+                oAction.setParameter("ID", sID);
+                oAction.setParameter("name", oData.name);
+                oAction.setParameter("deploymentUrl", oData.deploymentUrl);
+                oAction.setParameter("systemPrompt", oData.systemPrompt);
+                oAction.setParameter("authType", oData.authType);
+                oAction.setParameter("tokenUrl", oData.tokenUrl);
+                oAction.setParameter("clientId", oData.clientId);
+                oAction.setParameter("clientSecret", oData.clientSecret);
+                oAction.setParameter("scope", oData.scope);
+
+                oAction.execute().then(() => {
+                  oDialog.close();
+                  MessageToast.show("Model updated successfully");
+                  this._loadModels();
+                }).catch((oError) => {
+                  oDialog.setBusy(false);
+                  MessageToast.show("Error updating model: " + oError.message);
+                });
+              } else {
+                const oAction = oModel.bindContext("/createModel(...)");
+                oAction.setParameter("key", oData.key);
+                oAction.setParameter("name", oData.name);
+                oAction.setParameter("deploymentUrl", oData.deploymentUrl);
+                oAction.setParameter("systemPrompt", oData.systemPrompt);
+                oAction.setParameter("authType", oData.authType);
+                oAction.setParameter("tokenUrl", oData.tokenUrl);
+                oAction.setParameter("clientId", oData.clientId);
+                oAction.setParameter("clientSecret", oData.clientSecret);
+                oAction.setParameter("scope", oData.scope);
+
+                oAction.execute().then(() => {
+                  oDialog.close();
+                  MessageToast.show("Model added successfully");
+                  this._loadModels();
+                }).catch((oError) => {
+                  oDialog.setBusy(false);
+                  MessageToast.show("Error adding model: " + oError.message);
+                });
+              }
             },
           }),
           endButton: new Button({
@@ -300,6 +540,7 @@ sap.ui.define(
             press: () => oDialog.close(),
           }),
         });
+        this.getView().addDependent(oDialog);
         oDialog.open();
       },
 
@@ -312,7 +553,7 @@ sap.ui.define(
               const sModel = oEvent
                 .getParameter("listItem")
                 .getBindingContext("ui")
-                .getProperty("key");
+                .getProperty("modelKey");
               this._selectedModel = sModel;
               this.getView().byId("modelSelectButton").setText(sModel);
               if (this._selectedConversationId) {
@@ -327,7 +568,7 @@ sap.ui.define(
               path: "ui>/availableModels",
               template: new StandardListItem({
                 title: "{ui>name}",
-                description: "{ui>key}",
+                description: "{ui>modelKey}",
               }),
             },
           }),
@@ -346,8 +587,17 @@ sap.ui.define(
         this.getView().byId("chatPage").setBindingContext(null);
         this.getView().byId("messageList").unbindItems();
         this.getView().byId("conversationList").removeSelections();
-        this.getView().byId("modelSelectButton").setText("sap-abap-1");
-        this._selectedModel = "sap-abap-1";
+
+        const oUiModel = this.getView().getModel("ui");
+        const aModels = oUiModel.getProperty("/availableModels");
+
+        if (aModels && aModels.length > 0) {
+          this._selectedModel = aModels[0].modelKey;
+          this.getView().byId("modelSelectButton").setText(aModels[0].modelKey);
+        } else {
+          this._selectedModel = null;
+          this.getView().byId("modelSelectButton").setText("No model");
+        }
       },
 
       onConversationSelect: function (oEvent) {
@@ -357,8 +607,8 @@ sap.ui.define(
         if (!oContext) return;
 
         this._selectedConversationId = oContext.getProperty("ID");
-        this._selectedModel = oContext.getProperty("model") || "sap-abap-1";
-        this.getView().byId("modelSelectButton").setText(this._selectedModel);
+        this._selectedModel = oContext.getProperty("model");
+        this.getView().byId("modelSelectButton").setText(this._selectedModel || "No model");
 
         const oChatPage = this.getView().byId("chatPage");
         oChatPage.setBindingContext(oContext);
@@ -381,9 +631,16 @@ sap.ui.define(
       },
 
       _bindMessages: function (oContext) {
+        console.log("[_bindMessages] Binding messages for context:", oContext);
+        console.log("[_bindMessages] Context path:", oContext.getPath());
+
         const oMessageList = this.getView().byId("messageList");
+        const FormattedText = sap.m.FormattedText;
+
+        oMessageList.unbindItems();
+
         oMessageList.bindItems({
-          path: "messages",
+          path: oContext.getPath() + "/messages",
           sorter: new Sorter("createdAt", false),
           template: new CustomListItem({
             content: new HBox({
@@ -403,11 +660,19 @@ sap.ui.define(
                         }),
                       ],
                     }).addStyleClass("sapUiTinyMarginBottom"),
-                    new Text({ text: "{content}", wrapping: true }),
+                    new FormattedText({
+                      htmlText: {
+                        parts: [
+                          { path: "content" },
+                          { path: "role" }
+                        ],
+                        formatter: this.formatMessageContent.bind(this)
+                      },
+                      width: "100%"
+                    }),
                     new Text({
                       text: "{path: 'createdAt', type: 'sap.ui.model.type.DateTime', formatOptions: {style: 'short'}}",
-                      class: "chatTimestamp",
-                    }),
+                    }).addStyleClass("chatTimestamp"),
                   ],
                 })
                   .addStyleClass("chatBubble")
@@ -416,14 +681,41 @@ sap.ui.define(
                   ),
               ],
             }).addStyleClass("sapUiSmallMargin"),
-            class: "messageRow",
-          }),
+          }).addStyleClass("messageRow"),
           events: {
             change: () => this._scrollToBottom(),
             dataReceived: () => this._scrollToBottom(),
           },
         });
         this._scrollToBottom();
+      },
+
+      formatMessageContent: function (sContent, sRole) {
+        if (sRole === "user") {
+          return sContent ? sContent.replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
+        }
+
+        if (!sContent) return "";
+
+        if (!window.marked || !window.DOMPurify) {
+          return sContent;
+        }
+
+        try {
+          let html = window.marked.parse(sContent);
+
+          html = window.DOMPurify.sanitize(html, {
+            ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+              'ul', 'ol', 'li', 'code', 'pre', 'blockquote', 'a', 'table', 'thead',
+              'tbody', 'tr', 'th', 'td'],
+            ALLOWED_ATTR: ['href', 'class', 'target', 'rel']
+          });
+
+          return html;
+        } catch (error) {
+          console.error("Error converting markdown:", error);
+          return sContent;
+        }
       },
 
       _scrollToBottom: function () {
@@ -436,70 +728,127 @@ sap.ui.define(
         }, 300);
       },
 
+      _scrollToBottomImmediate: function () {
+        const oScrollContainer = this.getView().byId("scrollContainer");
+        const oDomRef = oScrollContainer ? oScrollContainer.getDomRef() : null;
+        if (oDomRef) {
+          oDomRef.scrollTop = oDomRef.scrollHeight;
+        }
+      },
+
       onSendMessage: function () {
         const oInput = this.getView().byId("chatInput");
         const sText = oInput.getValue();
         if (!sText) return;
+
+        if (!this._selectedModel) {
+          sap.m.MessageBox.error("Please select a model first. Go to Settings to add a model.");
+          return;
+        }
 
         const oModel = this.getView().getModel();
         const oUiModel = this.getView().getModel("ui");
         const oChatPage = this.getView().byId("chatPage");
 
         oInput.setValue("");
-        oChatPage.setBusy(true);
 
-        const oAction = oModel.bindContext("/sendMessage(...)");
-        oAction.setParameter("conversationId", this._selectedConversationId);
-        oAction.setParameter("text", sText);
-        oAction.setParameter("model", this._selectedModel);
+        oUiModel.setProperty("/isStreaming", true);
+        oUiModel.setProperty("/streamingText", "");
 
         const sStartConvId = this._selectedConversationId;
 
-        oAction
-          .execute()
-          .then(() => {
-            if (
-              this._selectedConversationId !== sStartConvId &&
-              sStartConvId !== null
-            ) {
-              oChatPage.setBusy(false);
-              return;
+        fetch("/api/chat/stream", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            conversationId: this._selectedConversationId,
+            text: sText,
+            model: this._selectedModel,
+          }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
             }
-            const oContext = oAction.getBoundContext();
-            const sFullReply =
-              oContext.getProperty("content") || "No response received";
-            oModel.refresh();
-            oChatPage.setBusy(false);
-            oUiModel.setProperty("/isStreaming", true);
-            oUiModel.setProperty("/streamingText", "");
 
-            const iTotalChars = sFullReply.length;
-            const iIntervalTime = Math.max(30, Math.floor(5000 / iTotalChars));
-            let iIndex = 0;
-            this._streamingInterval = setInterval(() => {
-              if (
-                this._selectedConversationId !== sStartConvId &&
-                sStartConvId !== null
-              ) {
-                this._stopStreaming();
-                return;
-              }
-              const sCurrentText = oUiModel.getProperty("/streamingText");
-              oUiModel.setProperty(
-                "/streamingText",
-                sCurrentText + sFullReply[iIndex],
-              );
-              this._scrollToBottom();
-              iIndex++;
-              if (iIndex >= iTotalChars) {
-                this._stopStreaming();
-                oModel.refresh();
-                this._scrollToBottom();
-              }
-            }, iIntervalTime);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let streamedText = "";
+
+            const readStream = () => {
+              reader.read().then(({ done, value }) => {
+                if (done) {
+                  oUiModel.setProperty("/isStreaming", false);
+                  oUiModel.setProperty("/streamingText", "");
+
+                  oModel.refresh();
+
+                  if (!sStartConvId) {
+                    setTimeout(() => {
+                      const oConvList = this.getView().byId("conversationList");
+                      const aItems = oConvList.getItems();
+                      if (aItems.length > 0) {
+                        oConvList.setSelectedItem(aItems[0]);
+                        const oContext = aItems[0].getBindingContext();
+                        this._selectedConversationId = oContext.getProperty("ID");
+                        this._bindMessages(oContext);
+                        oChatPage.setBindingContext(oContext);
+                      }
+                      setTimeout(() => this._scrollToBottom(), 300);
+                    }, 500);
+                  } else {
+                    const oContext = oChatPage.getBindingContext();
+                    if (oContext) {
+                      this._bindMessages(oContext);
+                    }
+                    setTimeout(() => this._scrollToBottom(), 300);
+                  }
+                  return;
+                }
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split("\n");
+
+                for (const line of lines) {
+                  if (line.startsWith("data: ")) {
+                    try {
+                      const data = JSON.parse(line.substring(6));
+
+                      if (data.error) {
+                        oUiModel.setProperty("/isStreaming", false);
+                        sap.m.MessageBox.error(data.error, {
+                          title: "Error",
+                          actions: [sap.m.MessageBox.Action.CLOSE]
+                        });
+                        return;
+                      }
+
+                      if (data.done) {
+                        if (data.conversationId && !sStartConvId) {
+                          this._selectedConversationId = data.conversationId;
+                        }
+                      } else if (data.content) {
+                        streamedText += data.content;
+                        const htmlContent = this.formatMessageContent(streamedText, "assistant");
+                        oUiModel.setProperty("/streamingText", htmlContent);
+                        this._scrollToBottomImmediate();
+                      }
+                    } catch (e) {
+                      console.error("Error parsing SSE data:", e);
+                    }
+                  }
+                }
+
+                readStream();
+              });
+            };
+
+            readStream();
           })
           .catch((oError) => {
-            oChatPage.setBusy(false);
+            oUiModel.setProperty("/isStreaming", false);
             MessageToast.show("Error: " + oError.message);
           });
       },
