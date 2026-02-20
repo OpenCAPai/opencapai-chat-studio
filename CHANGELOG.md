@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0](https://github.com/OpenCAPai/opencapai-chat-studio/compare/opencapai-chat-studio-v1.1.0...opencapai-chat-studio-v1.2.0) (2026-02-20)
+
+
+### Features
+
+* Enhance Gitignore and update release config ([3fd0f48](https://github.com/OpenCAPai/opencapai-chat-studio/commit/3fd0f4886e0c5384577a9043c2e76440f735ad6e))
+
 ## [1.1.0](https://github.com/OpenCAPai/opencapai-chat-studio/compare/opencapai-chat-studio-v1.0.0...opencapai-chat-studio-v1.1.0) (2026-02-14)
 
 

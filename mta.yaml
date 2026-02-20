@@ -1,17 +1,15 @@
 _schema-version: '3.1'
 ID: opencapai-chat-studio
-version: 1.1.0
+version: 1.2.0
 description: OpenCAP AI Chat Studio - Enterprise AI Chat Platform
 parameters:
   enable-parallel-deployments: true
-
 build-parameters:
   before-all:
     - builder: custom
       commands:
         - npm ci
         - npx cds build --production
-
 modules:
   - name: opencapai-chat-studio-srv
     type: nodejs
@@ -31,7 +29,6 @@ modules:
       - name: opencapai-chat-studio-uaa
       - name: opencapai-chat-studio-destination
         optional: true
-
   - name: opencapai-chat-studio-db-deployer
     type: hdb
     path: gen/db
@@ -41,7 +38,6 @@ modules:
       disk-quota: 512M
     requires:
       - name: opencapai-chat-studio-db
-
   - name: opencapai-chat-studio-ui
     type: html5
     path: app
@@ -51,7 +47,6 @@ modules:
         - npm ci
         - npm run build
       supported-platforms: []
-
 resources:
   - name: opencapai-chat-studio-db
     type: com.sap.xs.hdi-container
@@ -60,7 +55,6 @@ resources:
       service-plan: hdi-shared
     properties:
       hdi-service-name: ${service-name}
-
   - name: opencapai-chat-studio-uaa
     type: org.cloudfoundry.managed-service
     parameters:
@@ -86,7 +80,6 @@ resources:
             scope-references:
               - $XSAPPNAME.User
               - $XSAPPNAME.Admin
-
   - name: opencapai-chat-studio-destination
     type: org.cloudfoundry.managed-service
     parameters:
