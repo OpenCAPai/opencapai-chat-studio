@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0](https://github.com/OpenCAPai/opencapai-chat-studio/compare/opencapai-chat-studio-v1.2.0...opencapai-chat-studio-v1.3.0) (2026-03-14)
+
+
+### Features
+
+* Add CI, linting, tests and refactor adapters ([4ff8119](https://github.com/OpenCAPai/opencapai-chat-studio/commit/4ff81194295bb60469b4fadce07bde1a6bc833d2))
+* add OAuth2 authentication and keyboard shortcuts support ([1e7e257](https://github.com/OpenCAPai/opencapai-chat-studio/commit/1e7e2574c090145670fca0e4d21bd6a484d198be))
+
+
+### Bug Fixes
+
+* Add package-lock and expand CI Node matrix ([3590c26](https://github.com/OpenCAPai/opencapai-chat-studio/commit/3590c26d0876edb051dc6496594d4656b05a193e))
+* Drop Node 18 from CI and trigger release on push ([89765b0](https://github.com/OpenCAPai/opencapai-chat-studio/commit/89765b0e3b9f3b64877f87e3d7425221b6bd1df9))
+* Drop Node 18 from CI and trigger release on push ([c572068](https://github.com/OpenCAPai/opencapai-chat-studio/commit/c5720681e0d13482f8045508e2cfabaa8f35cc2e))
+
 ## [1.2.0](https://github.com/OpenCAPai/opencapai-chat-studio/compare/opencapai-chat-studio-v1.1.0...opencapai-chat-studio-v1.2.0) (2026-02-20)
 
 
