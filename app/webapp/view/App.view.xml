@@ -30,6 +30,12 @@
                             press=".onNewChat"
                         />
                         <Button
+                        id="chatApp-page-button-import"
+                            icon="sap-icon://upload"
+                            tooltip="Import Conversation"
+                            press=".onImportConversation"
+                        />
+                        <Button
                         id="chatApp-page-button-setting"
                             icon="sap-icon://settings"
                             press=".onOpenSettings"
@@ -78,11 +84,19 @@
                                         <Button id="_IDGenButton"
                                             icon="sap-icon://edit"
                                             type="Transparent"
+                                            tooltip="Edit Title"
                                             press=".onEditTitle"
+                                        />
+                                        <Button id="_IDGenButtonExport"
+                                            icon="sap-icon://download"
+                                            type="Transparent"
+                                            tooltip="Export Conversation"
+                                            press=".onExportConversation"
                                         />
                                         <Button id="_IDGenButton1"
                                             icon="sap-icon://delete"
                                             type="Transparent"
+                                            tooltip="Delete Conversation"
                                             press=".onDeleteConversation"
                                         />
                                     </HBox>
