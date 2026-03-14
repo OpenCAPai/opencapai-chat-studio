@@ -1,5 +1,6 @@
 using {sap.cap.ai as my} from '../db/schema';
 
+@path: '/odata/v4/chat'
 service ChatService {
     entity Conversations   as projection on my.Conversations;
     entity Messages        as projection on my.Messages;
@@ -53,7 +54,6 @@ service ChatService {
     action   deleteModel(ID: UUID)                                                    returns Boolean;
     action   testModelAuth(ID: UUID)                                                  returns String;
 
-    // OAuth2 Provider management
     action   createOAuth2Provider(name: String,
                                   tokenUrl: String,
                                   clientId: String,

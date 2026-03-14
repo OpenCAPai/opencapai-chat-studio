@@ -35,20 +35,17 @@ entity OAuth2Providers : cuid, managed {
 entity Models : cuid, managed {
     modelKey         : String not null;
     name             : String not null;
-    modelCategory    : String default 'sap-abap'; // 'sap-abap', 'claude-anthropic', 'openai-gpt', 'custom'
+    modelCategory    : String default 'sap-abap';
     deploymentUrl    : String not null;
     systemPrompt     : String;
-    authType         : String default 'bearer'; // 'bearer', 'oauth2', 'none'
-    // OAuth2 direct config (legacy)
+    authType         : String default 'bearer';
     tokenUrl         : String;
     clientId         : String;
     clientSecret     : String;
     scope            : String;
-    // OAuth2 provider reference (new)
     oauth2Provider   : Association to OAuth2Providers;
     cachedToken      : String;
     tokenExpiresAt   : DateTime;
-    // Advanced parameters
     temperature      : Decimal(3, 2) default 0.7;
     maxTokens        : Integer default 2000;
     topP             : Decimal(3, 2) default 1.0;

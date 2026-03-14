@@ -18,7 +18,6 @@ sap.ui.define(
     "sap/ui/model/json/JSONModel",
     "sap/m/ActionSheet",
     "sap/ui/core/CustomData",
-    "sap/ui/core/library",
   ],
   function (
     Controller,
@@ -39,7 +38,6 @@ sap.ui.define(
     JSONModel,
     ActionSheet,
     CustomData,
-    coreLibrary,
   ) {
     "use strict";
 
@@ -64,8 +62,8 @@ sap.ui.define(
             id: "",
             name: "Loading...",
             email: "",
-            roles: []
-          }
+            roles: [],
+          },
         });
         this.getView().setModel(oUiModel, "ui");
         this._loadUserInfo();
@@ -93,16 +91,13 @@ sap.ui.define(
           if ((oEvent.ctrlKey || oEvent.metaKey) && oEvent.key === "Enter") {
             oEvent.preventDefault();
             this.onSendMessage();
-          }
-          else if ((oEvent.ctrlKey || oEvent.metaKey) && oEvent.key === "n") {
+          } else if ((oEvent.ctrlKey || oEvent.metaKey) && oEvent.key === "n") {
             oEvent.preventDefault();
             this.onNewChat();
-          }
-          else if ((oEvent.ctrlKey || oEvent.metaKey) && oEvent.key === "k") {
+          } else if ((oEvent.ctrlKey || oEvent.metaKey) && oEvent.key === "k") {
             oEvent.preventDefault();
             MessageToast.show("Search feature coming soon!");
-          }
-          else if (oEvent.key === "Escape") {
+          } else if (oEvent.key === "Escape") {
             const oUiModel = this.getView().getModel("ui");
             if (oUiModel.getProperty("/isStreaming")) {
               oEvent.preventDefault();
@@ -135,7 +130,7 @@ sap.ui.define(
               id: "error",
               name: "Error loading user",
               email: "",
-              roles: []
+              roles: [],
             });
           });
       },
@@ -219,8 +214,7 @@ sap.ui.define(
           });
       },
 
-      onAvatarPress: function (oEvent) {
-        const oButton = oEvent.getSource();
+      onAvatarPress: function () {
         const oUiModel = this.getView().getModel("ui");
         const oUserInfo = oUiModel.getProperty("/userInfo");
 
@@ -235,39 +229,49 @@ sap.ui.define(
                   items: [
                     new sap.m.Avatar({
                       displaySize: "XL",
-                      initials: oUserInfo.name ? oUserInfo.name.substring(0, 2).toUpperCase() : "??",
-                      backgroundColor: "Accent6"
-                    })
-                  ]
+                      initials: oUserInfo.name
+                        ? oUserInfo.name.substring(0, 2).toUpperCase()
+                        : "??",
+                      backgroundColor: "Accent6",
+                    }),
+                  ],
                 }).addStyleClass("sapUiSmallMarginBottom"),
                 new VBox({
                   items: [
                     new Label({ text: "Name", design: "Bold" }),
-                    new Text({ text: "{ui>/userInfo/name}" }).addStyleClass("sapUiSmallMarginBottom"),
+                    new Text({ text: "{ui>/userInfo/name}" }).addStyleClass(
+                      "sapUiSmallMarginBottom",
+                    ),
                     new Label({ text: "Email", design: "Bold" }),
-                    new Text({ text: "{ui>/userInfo/email}" }).addStyleClass("sapUiSmallMarginBottom"),
+                    new Text({ text: "{ui>/userInfo/email}" }).addStyleClass(
+                      "sapUiSmallMarginBottom",
+                    ),
                     new Label({ text: "User ID", design: "Bold" }),
-                    new Text({ text: "{ui>/userInfo/id}" }).addStyleClass("sapUiSmallMarginBottom"),
+                    new Text({ text: "{ui>/userInfo/id}" }).addStyleClass(
+                      "sapUiSmallMarginBottom",
+                    ),
                     new Label({ text: "Roles", design: "Bold" }),
                     new Text({
                       text: {
                         path: "ui>/userInfo/roles",
                         formatter: function (aRoles) {
-                          return aRoles && aRoles.length > 0 ? aRoles.join(", ") : "No roles assigned";
-                        }
-                      }
-                    })
-                  ]
-                })
-              ]
-            }).addStyleClass("sapUiSmallMargin")
+                          return aRoles && aRoles.length > 0
+                            ? aRoles.join(", ")
+                            : "No roles assigned";
+                        },
+                      },
+                    }),
+                  ],
+                }),
+              ],
+            }).addStyleClass("sapUiSmallMargin"),
           ],
           beginButton: new Button({
             text: "Close",
             press: function () {
               oDialog.close();
-            }
-          })
+            },
+          }),
         });
 
         this.getView().addDependent(oDialog);
@@ -281,12 +285,6 @@ sap.ui.define(
           value: "{ui>/aiCoreConfig/token}",
           placeholder: "Bearer Token (JWT)",
           rows: 4,
-          width: "100%",
-        });
-
-        const oDeploymentUrlInput = new Input({
-          value: "https://api.ai.prod-eu20.westeurope.azure.ml.hana.ondemand.com/v2/inference/deployments/da814b66ca186364/v2/completion",
-          placeholder: "Deployment URL",
           width: "100%",
         });
 
@@ -389,19 +387,33 @@ sap.ui.define(
                                     `Are you sure you want to delete the model "${sName}"?`,
                                     {
                                       onClose: (oAction) => {
-                                        if (oAction === sap.m.MessageBox.Action.OK) {
-                                          const oModel = this.getView().getModel();
-                                          const oDeleteAction = oModel.bindContext("/deleteModel(...)");
+                                        if (
+                                          oAction === sap.m.MessageBox.Action.OK
+                                        ) {
+                                          const oModel =
+                                            this.getView().getModel();
+                                          const oDeleteAction =
+                                            oModel.bindContext(
+                                              "/deleteModel(...)",
+                                            );
                                           oDeleteAction.setParameter("ID", sID);
-                                          oDeleteAction.execute().then(() => {
-                                            MessageToast.show("Model deleted successfully");
-                                            this._loadModels();
-                                          }).catch((oError) => {
-                                            MessageToast.show("Error deleting model: " + oError.message);
-                                          });
+                                          oDeleteAction
+                                            .execute()
+                                            .then(() => {
+                                              MessageToast.show(
+                                                "Model deleted successfully",
+                                              );
+                                              this._loadModels();
+                                            })
+                                            .catch((oError) => {
+                                              MessageToast.show(
+                                                "Error deleting model: " +
+                                                  oError.message,
+                                              );
+                                            });
                                         }
                                       },
-                                    }
+                                    },
                                   );
                                 },
                               }),
@@ -447,7 +459,9 @@ sap.ui.define(
                                 icon: "sap-icon://edit",
                                 type: "Transparent",
                                 press: (oE) => {
-                                  const oCtx = oE.getSource().getBindingContext("ui");
+                                  const oCtx = oE
+                                    .getSource()
+                                    .getBindingContext("ui");
                                   this._onOpenProviderDialog(oCtx);
                                 },
                               }),
@@ -455,7 +469,9 @@ sap.ui.define(
                                 icon: "sap-icon://delete",
                                 type: "Transparent",
                                 press: (oE) => {
-                                  const oCtx = oE.getSource().getBindingContext("ui");
+                                  const oCtx = oE
+                                    .getSource()
+                                    .getBindingContext("ui");
                                   const sID = oCtx.getProperty("ID");
                                   const sName = oCtx.getProperty("name");
 
@@ -463,19 +479,33 @@ sap.ui.define(
                                     `Are you sure you want to delete the OAuth2 provider "${sName}"?`,
                                     {
                                       onClose: (oAction) => {
-                                        if (oAction === sap.m.MessageBox.Action.OK) {
-                                          const oModel = this.getView().getModel();
-                                          const oDeleteAction = oModel.bindContext("/deleteOAuth2Provider(...)");
+                                        if (
+                                          oAction === sap.m.MessageBox.Action.OK
+                                        ) {
+                                          const oModel =
+                                            this.getView().getModel();
+                                          const oDeleteAction =
+                                            oModel.bindContext(
+                                              "/deleteOAuth2Provider(...)",
+                                            );
                                           oDeleteAction.setParameter("ID", sID);
-                                          oDeleteAction.execute().then(() => {
-                                            MessageToast.show("OAuth2 provider deleted successfully");
-                                            this._loadOAuth2Providers();
-                                          }).catch((oError) => {
-                                            MessageToast.show("Error deleting provider: " + oError.message);
-                                          });
+                                          oDeleteAction
+                                            .execute()
+                                            .then(() => {
+                                              MessageToast.show(
+                                                "OAuth2 provider deleted successfully",
+                                              );
+                                              this._loadOAuth2Providers();
+                                            })
+                                            .catch((oError) => {
+                                              MessageToast.show(
+                                                "Error deleting provider: " +
+                                                  oError.message,
+                                              );
+                                            });
                                         }
                                       },
-                                    }
+                                    },
                                   );
                                 },
                               }),
@@ -483,8 +513,12 @@ sap.ui.define(
                           }),
                         ],
                       }),
-                      new Text({ text: "URL: {ui>tokenUrl}" }).addStyleClass("sapUiTinyMarginTop"),
-                      new Text({ text: "Description: {ui>description}" }).addStyleClass("sapUiTinyMarginTop"),
+                      new Text({ text: "URL: {ui>tokenUrl}" }).addStyleClass(
+                        "sapUiTinyMarginTop",
+                      ),
+                      new Text({
+                        text: "Description: {ui>description}",
+                      }).addStyleClass("sapUiTinyMarginTop"),
                     ],
                   }).addStyleClass("sapUiSmallMargin"),
                 }),
@@ -527,31 +561,40 @@ sap.ui.define(
           const sUrl = oUrl.getValue();
           const sCategory = oModelCategorySelect.getSelectedKey();
           if (sUrl && sCategory) {
-            this._validateDeploymentUrl(sUrl, sCategory).then((oResult) => {
-              if (oResult.valid) {
-                oUrlValidationText.setText("✓ " + oResult.message);
-                oUrlValidationText.removeStyleClass("errorText");
-                oUrlValidationText.addStyleClass("successText");
-              } else {
-                oUrlValidationText.setText("⚠ " + oResult.message);
-                oUrlValidationText.removeStyleClass("successText");
-                oUrlValidationText.addStyleClass("errorText");
-                if (oResult.suggestedUrl) {
-                  oUrl.setValueState("Warning");
-                  oUrl.setValueStateText("Suggested: " + oResult.suggestedUrl);
+            this._validateDeploymentUrl(sUrl, sCategory)
+              .then((oResult) => {
+                if (oResult.valid) {
+                  oUrlValidationText.setText("✓ " + oResult.message);
+                  oUrlValidationText.removeStyleClass("errorText");
+                  oUrlValidationText.addStyleClass("successText");
+                } else {
+                  oUrlValidationText.setText("⚠ " + oResult.message);
+                  oUrlValidationText.removeStyleClass("successText");
+                  oUrlValidationText.addStyleClass("errorText");
+                  if (oResult.suggestedUrl) {
+                    oUrl.setValueState("Warning");
+                    oUrl.setValueStateText(
+                      "Suggested: " + oResult.suggestedUrl,
+                    );
+                  }
                 }
-              }
-            }).catch(() => {
-              oUrlValidationText.setText("");
-            });
+              })
+              .catch(() => {
+                oUrlValidationText.setText("");
+              });
           }
         };
 
         const oModelCategorySelect = new sap.m.Select({
-          selectedKey: bEdit ? oContext.getProperty("modelCategory") : "sap-abap",
+          selectedKey: bEdit
+            ? oContext.getProperty("modelCategory")
+            : "sap-abap",
           items: [
             new sap.ui.core.Item({ key: "sap-abap", text: "SAP ABAP" }),
-            new sap.ui.core.Item({ key: "claude-anthropic", text: "Claude Anthropic" }),
+            new sap.ui.core.Item({
+              key: "claude-anthropic",
+              text: "Claude Anthropic",
+            }),
             new sap.ui.core.Item({ key: "openai-gpt", text: "OpenAI GPT" }),
             new sap.ui.core.Item({ key: "custom", text: "Custom" }),
           ],
@@ -573,8 +616,14 @@ sap.ui.define(
         const oAuthTypeSelect = new sap.m.Select({
           selectedKey: bEdit ? oContext.getProperty("authType") : "bearer",
           items: [
-            new sap.ui.core.Item({ key: "bearer", text: "Bearer Token (AI Core)" }),
-            new sap.ui.core.Item({ key: "oauth2", text: "OAuth2 Client Credentials" }),
+            new sap.ui.core.Item({
+              key: "bearer",
+              text: "Bearer Token (AI Core)",
+            }),
+            new sap.ui.core.Item({
+              key: "oauth2",
+              text: "OAuth2 Client Credentials",
+            }),
             new sap.ui.core.Item({ key: "none", text: "No Authentication" }),
           ],
           change: (oEvent) => {
@@ -613,7 +662,9 @@ sap.ui.define(
           value: bEdit ? oContext.getProperty("clientId") : "",
         });
         const oClientSecret = new Input({
-          placeholder: bEdit ? "Client Secret (leave empty to keep current)" : "Client Secret",
+          placeholder: bEdit
+            ? "Client Secret (leave empty to keep current)"
+            : "Client Secret",
           type: "Password",
           value: "",
         });
@@ -637,12 +688,10 @@ sap.ui.define(
         }).addStyleClass("sapUiSmallMarginTop");
 
         const oOAuth2Box = new VBox({
-          visible: bEdit ? oContext.getProperty("authType") === "oauth2" : false,
-          items: [
-            oUseProviderCheckbox,
-            oProviderSelect,
-            oOAuth2DirectBox,
-          ],
+          visible: bEdit
+            ? oContext.getProperty("authType") === "oauth2"
+            : false,
+          items: [oUseProviderCheckbox, oProviderSelect, oOAuth2DirectBox],
         }).addStyleClass("sapUiSmallMarginTop");
 
         const oTemperature = new sap.m.StepInput({
@@ -651,7 +700,7 @@ sap.ui.define(
           max: 2,
           step: 0.1,
           displayValuePrecision: 2,
-          width: "100%"
+          width: "100%",
         });
 
         const oMaxTokens = new sap.m.StepInput({
@@ -659,7 +708,7 @@ sap.ui.define(
           min: 1,
           max: 32000,
           step: 100,
-          width: "100%"
+          width: "100%",
         });
 
         const oAdvancedBox = new VBox({
@@ -691,7 +740,10 @@ sap.ui.define(
                 new Label({ text: "Authentication Type" }),
                 oAuthTypeSelect,
                 oOAuth2Box,
-                new Label({ text: "Advanced Parameters", design: "Bold" }).addStyleClass("sapUiSmallMarginTop"),
+                new Label({
+                  text: "Advanced Parameters",
+                  design: "Bold",
+                }).addStyleClass("sapUiSmallMarginTop"),
                 oAdvancedBox,
               ],
             }).addStyleClass("sapUiSmallMargin"),
@@ -702,7 +754,9 @@ sap.ui.define(
             press: () => {
               const sAuthType = oAuthTypeSelect.getSelectedKey();
               const bUseProvider = oUseProviderCheckbox.getSelected();
-              const sProviderId = bUseProvider ? oProviderSelect.getSelectedKey() : null;
+              const sProviderId = bUseProvider
+                ? oProviderSelect.getSelectedKey()
+                : null;
 
               const oData = {
                 key: oKey.getValue(),
@@ -711,10 +765,22 @@ sap.ui.define(
                 deploymentUrl: oUrl.getValue(),
                 systemPrompt: oPrompt.getValue(),
                 authType: sAuthType,
-                tokenUrl: sAuthType === "oauth2" && !bUseProvider ? oTokenUrl.getValue() : "",
-                clientId: sAuthType === "oauth2" && !bUseProvider ? oClientId.getValue() : "",
-                clientSecret: sAuthType === "oauth2" && !bUseProvider ? oClientSecret.getValue() : "",
-                scope: sAuthType === "oauth2" && !bUseProvider ? oScope.getValue() : "",
+                tokenUrl:
+                  sAuthType === "oauth2" && !bUseProvider
+                    ? oTokenUrl.getValue()
+                    : "",
+                clientId:
+                  sAuthType === "oauth2" && !bUseProvider
+                    ? oClientId.getValue()
+                    : "",
+                clientSecret:
+                  sAuthType === "oauth2" && !bUseProvider
+                    ? oClientSecret.getValue()
+                    : "",
+                scope:
+                  sAuthType === "oauth2" && !bUseProvider
+                    ? oScope.getValue()
+                    : "",
                 oauth2ProviderId: sProviderId,
                 temperature: oTemperature.getValue(),
                 maxTokens: oMaxTokens.getValue(),
@@ -741,17 +807,25 @@ sap.ui.define(
                 oAction.setParameter("temperature", oData.temperature);
                 oAction.setParameter("maxTokens", oData.maxTokens);
                 oAction.setParameter("topP", oData.topP);
-                oAction.setParameter("frequencyPenalty", oData.frequencyPenalty);
+                oAction.setParameter(
+                  "frequencyPenalty",
+                  oData.frequencyPenalty,
+                );
                 oAction.setParameter("presencePenalty", oData.presencePenalty);
 
-                oAction.execute().then(() => {
-                  oDialog.close();
-                  MessageToast.show("Model updated successfully");
-                  this._loadModels();
-                }).catch((oError) => {
-                  oDialog.setBusy(false);
-                  MessageToast.show("Error updating model: " + oError.message);
-                });
+                oAction
+                  .execute()
+                  .then(() => {
+                    oDialog.close();
+                    MessageToast.show("Model updated successfully");
+                    this._loadModels();
+                  })
+                  .catch((oError) => {
+                    oDialog.setBusy(false);
+                    MessageToast.show(
+                      "Error updating model: " + oError.message,
+                    );
+                  });
               } else {
                 const oAction = oModel.bindContext("/createModel(...)");
                 oAction.setParameter("key", oData.key);
@@ -764,21 +838,30 @@ sap.ui.define(
                 oAction.setParameter("clientId", oData.clientId);
                 oAction.setParameter("clientSecret", oData.clientSecret);
                 oAction.setParameter("scope", oData.scope);
-                oAction.setParameter("oauth2ProviderId", oData.oauth2ProviderId);
+                oAction.setParameter(
+                  "oauth2ProviderId",
+                  oData.oauth2ProviderId,
+                );
                 oAction.setParameter("temperature", oData.temperature);
                 oAction.setParameter("maxTokens", oData.maxTokens);
                 oAction.setParameter("topP", oData.topP);
-                oAction.setParameter("frequencyPenalty", oData.frequencyPenalty);
+                oAction.setParameter(
+                  "frequencyPenalty",
+                  oData.frequencyPenalty,
+                );
                 oAction.setParameter("presencePenalty", oData.presencePenalty);
 
-                oAction.execute().then(() => {
-                  oDialog.close();
-                  MessageToast.show("Model added successfully");
-                  this._loadModels();
-                }).catch((oError) => {
-                  oDialog.setBusy(false);
-                  MessageToast.show("Error adding model: " + oError.message);
-                });
+                oAction
+                  .execute()
+                  .then(() => {
+                    oDialog.close();
+                    MessageToast.show("Model added successfully");
+                    this._loadModels();
+                  })
+                  .catch((oError) => {
+                    oDialog.setBusy(false);
+                    MessageToast.show("Error adding model: " + oError.message);
+                  });
               }
             },
           }),
@@ -817,7 +900,9 @@ sap.ui.define(
         });
 
         const oClientSecret = new Input({
-          placeholder: bEdit ? "Client Secret (leave empty to keep current)" : "Client Secret",
+          placeholder: bEdit
+            ? "Client Secret (leave empty to keep current)"
+            : "Client Secret",
           type: "Password",
           value: "",
         });
@@ -865,7 +950,9 @@ sap.ui.define(
 
               if (bEdit) {
                 const sID = oContext.getProperty("ID");
-                const oAction = oModel.bindContext("/updateOAuth2Provider(...)");
+                const oAction = oModel.bindContext(
+                  "/updateOAuth2Provider(...)",
+                );
                 oAction.setParameter("ID", sID);
                 oAction.setParameter("name", oData.name);
                 oAction.setParameter("description", oData.description);
@@ -874,16 +961,23 @@ sap.ui.define(
                 oAction.setParameter("clientSecret", oData.clientSecret);
                 oAction.setParameter("scope", oData.scope);
 
-                oAction.execute().then(() => {
-                  oDialog.close();
-                  MessageToast.show("OAuth2 provider updated successfully");
-                  this._loadOAuth2Providers();
-                }).catch((oError) => {
-                  oDialog.setBusy(false);
-                  MessageToast.show("Error updating provider: " + oError.message);
-                });
+                oAction
+                  .execute()
+                  .then(() => {
+                    oDialog.close();
+                    MessageToast.show("OAuth2 provider updated successfully");
+                    this._loadOAuth2Providers();
+                  })
+                  .catch((oError) => {
+                    oDialog.setBusy(false);
+                    MessageToast.show(
+                      "Error updating provider: " + oError.message,
+                    );
+                  });
               } else {
-                const oAction = oModel.bindContext("/createOAuth2Provider(...)");
+                const oAction = oModel.bindContext(
+                  "/createOAuth2Provider(...)",
+                );
                 oAction.setParameter("name", oData.name);
                 oAction.setParameter("description", oData.description);
                 oAction.setParameter("tokenUrl", oData.tokenUrl);
@@ -891,14 +985,19 @@ sap.ui.define(
                 oAction.setParameter("clientSecret", oData.clientSecret);
                 oAction.setParameter("scope", oData.scope);
 
-                oAction.execute().then(() => {
-                  oDialog.close();
-                  MessageToast.show("OAuth2 provider added successfully");
-                  this._loadOAuth2Providers();
-                }).catch((oError) => {
-                  oDialog.setBusy(false);
-                  MessageToast.show("Error adding provider: " + oError.message);
-                });
+                oAction
+                  .execute()
+                  .then(() => {
+                    oDialog.close();
+                    MessageToast.show("OAuth2 provider added successfully");
+                    this._loadOAuth2Providers();
+                  })
+                  .catch((oError) => {
+                    oDialog.setBusy(false);
+                    MessageToast.show(
+                      "Error adding provider: " + oError.message,
+                    );
+                  });
               }
             },
           }),
@@ -976,7 +1075,9 @@ sap.ui.define(
 
         this._selectedConversationId = oContext.getProperty("ID");
         this._selectedModel = oContext.getProperty("model");
-        this.getView().byId("modelSelectButton").setText(this._selectedModel || "No model");
+        this.getView()
+          .byId("modelSelectButton")
+          .setText(this._selectedModel || "No model");
 
         const oChatPage = this.getView().byId("chatPage");
         oChatPage.setBindingContext(oContext);
@@ -1030,13 +1131,10 @@ sap.ui.define(
                     }).addStyleClass("sapUiTinyMarginBottom"),
                     new FormattedText({
                       htmlText: {
-                        parts: [
-                          { path: "content" },
-                          { path: "role" }
-                        ],
-                        formatter: this.formatMessageContent.bind(this)
+                        parts: [{ path: "content" }, { path: "role" }],
+                        formatter: this.formatMessageContent.bind(this),
                       },
-                      width: "100%"
+                      width: "100%",
                     }),
                     new Text({
                       text: "{path: 'createdAt', type: 'sap.ui.model.type.DateTime', formatOptions: {style: 'short'}}",
@@ -1060,7 +1158,9 @@ sap.ui.define(
 
       formatMessageContent: function (sContent, sRole) {
         if (sRole === "user") {
-          return sContent ? sContent.replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
+          return sContent
+            ? sContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")
+            : "";
         }
 
         if (!sContent) return "";
@@ -1073,10 +1173,33 @@ sap.ui.define(
           let html = window.marked.parse(sContent);
 
           html = window.DOMPurify.sanitize(html, {
-            ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-              'ul', 'ol', 'li', 'code', 'pre', 'blockquote', 'a', 'table', 'thead',
-              'tbody', 'tr', 'th', 'td'],
-            ALLOWED_ATTR: ['href', 'class', 'target', 'rel']
+            ALLOWED_TAGS: [
+              "p",
+              "br",
+              "strong",
+              "em",
+              "u",
+              "h1",
+              "h2",
+              "h3",
+              "h4",
+              "h5",
+              "h6",
+              "ul",
+              "ol",
+              "li",
+              "code",
+              "pre",
+              "blockquote",
+              "a",
+              "table",
+              "thead",
+              "tbody",
+              "tr",
+              "th",
+              "td",
+            ],
+            ALLOWED_ATTR: ["href", "class", "target", "rel"],
           });
 
           return html;
@@ -1110,7 +1233,9 @@ sap.ui.define(
         if (!sText) return;
 
         if (!this._selectedModel) {
-          sap.m.MessageBox.error("Please select a model first. Go to Settings to add a model.");
+          sap.m.MessageBox.error(
+            "Please select a model first. Go to Settings to add a model.",
+          );
           return;
         }
 
@@ -1160,7 +1285,8 @@ sap.ui.define(
                       if (aItems.length > 0) {
                         oConvList.setSelectedItem(aItems[0]);
                         const oContext = aItems[0].getBindingContext();
-                        this._selectedConversationId = oContext.getProperty("ID");
+                        this._selectedConversationId =
+                          oContext.getProperty("ID");
                         this._bindMessages(oContext);
                         oChatPage.setBindingContext(oContext);
                       }
@@ -1188,7 +1314,7 @@ sap.ui.define(
                         oUiModel.setProperty("/isStreaming", false);
                         sap.m.MessageBox.error(data.error, {
                           title: "Error",
-                          actions: [sap.m.MessageBox.Action.CLOSE]
+                          actions: [sap.m.MessageBox.Action.CLOSE],
                         });
                         return;
                       }
@@ -1199,7 +1325,10 @@ sap.ui.define(
                         }
                       } else if (data.content) {
                         streamedText += data.content;
-                        const htmlContent = this.formatMessageContent(streamedText, "assistant");
+                        const htmlContent = this.formatMessageContent(
+                          streamedText,
+                          "assistant",
+                        );
                         oUiModel.setProperty("/streamingText", htmlContent);
                         this._scrollToBottomImmediate();
                       }
@@ -1271,24 +1400,29 @@ sap.ui.define(
         const oAction = oModel.bindContext("/exportConversation(...)");
         oAction.setParameter("conversationId", sId);
 
-        oAction.execute().then(() => {
-          const oResult = oAction.getBoundContext().getObject();
-          const sJson = oResult.value;
+        oAction
+          .execute()
+          .then(() => {
+            const oResult = oAction.getBoundContext().getObject();
+            const sJson = oResult.value;
 
-          const blob = new Blob([sJson], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${sTitle.replace(/[^a-z0-9]/gi, '_')}_export.json`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
+            const blob = new Blob([sJson], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${sTitle.replace(/[^a-z0-9]/gi, "_")}_export.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
 
-          MessageToast.show("Conversation exported successfully");
-        }).catch((oError) => {
-          MessageToast.show("Error exporting conversation: " + oError.message);
-        });
+            MessageToast.show("Conversation exported successfully");
+          })
+          .catch((oError) => {
+            MessageToast.show(
+              "Error exporting conversation: " + oError.message,
+            );
+          });
       },
 
       onImportConversation: function () {
@@ -1305,17 +1439,22 @@ sap.ui.define(
                 const oAction = oModel.bindContext("/importConversation(...)");
                 oAction.setParameter("data", sContent);
 
-                oAction.execute().then(() => {
-                  MessageToast.show("Conversation imported successfully");
-                  oModel.refresh();
-                  oDialog.close();
-                }).catch((oError) => {
-                  MessageToast.show("Error importing conversation: " + oError.message);
-                });
+                oAction
+                  .execute()
+                  .then(() => {
+                    MessageToast.show("Conversation imported successfully");
+                    oModel.refresh();
+                    oDialog.close();
+                  })
+                  .catch((oError) => {
+                    MessageToast.show(
+                      "Error importing conversation: " + oError.message,
+                    );
+                  });
               };
               reader.readAsText(oFile);
             }
-          }
+          },
         });
 
         const oDialog = new Dialog({
@@ -1324,14 +1463,14 @@ sap.ui.define(
             new VBox({
               items: [
                 new Text({ text: "Select a JSON file to import:" }),
-                oFileUploader
-              ]
-            }).addStyleClass("sapUiSmallMargin")
+                oFileUploader,
+              ],
+            }).addStyleClass("sapUiSmallMargin"),
           ],
           beginButton: new Button({
             text: "Cancel",
-            press: () => oDialog.close()
-          })
+            press: () => oDialog.close(),
+          }),
         });
 
         this.getView().addDependent(oDialog);
@@ -1346,15 +1485,15 @@ sap.ui.define(
         const oTextArea = new TextArea({
           value: sContent,
           rows: 5,
-          width: "100%"
+          width: "100%",
         });
 
         const oDialog = new Dialog({
           title: "Edit Message",
           content: [
             new VBox({
-              items: [oTextArea]
-            }).addStyleClass("sapUiSmallMargin")
+              items: [oTextArea],
+            }).addStyleClass("sapUiSmallMargin"),
           ],
           beginButton: new Button({
             text: "Save",
@@ -1367,19 +1506,22 @@ sap.ui.define(
               oAction.setParameter("messageId", sId);
               oAction.setParameter("newContent", sNewContent);
 
-              oAction.execute().then(() => {
-                MessageToast.show("Message edited successfully");
-                oModel.refresh();
-                oDialog.close();
-              }).catch((oError) => {
-                MessageToast.show("Error editing message: " + oError.message);
-              });
-            }
+              oAction
+                .execute()
+                .then(() => {
+                  MessageToast.show("Message edited successfully");
+                  oModel.refresh();
+                  oDialog.close();
+                })
+                .catch((oError) => {
+                  MessageToast.show("Error editing message: " + oError.message);
+                });
+            },
           }),
           endButton: new Button({
             text: "Cancel",
-            press: () => oDialog.close()
-          })
+            press: () => oDialog.close(),
+          }),
         });
 
         this.getView().addDependent(oDialog);
@@ -1390,26 +1532,36 @@ sap.ui.define(
         const oContext = oEvent.getSource().getBindingContext();
         const sId = oContext.getProperty("ID");
 
-        sap.m.MessageBox.confirm("Are you sure you want to regenerate this response?", {
-          onClose: (oAction) => {
-            if (oAction === sap.m.MessageBox.Action.OK) {
-              const oModel = this.getView().getModel();
-              const oActionBinding = oModel.bindContext("/regenerateMessage(...)");
-              oActionBinding.setParameter("messageId", sId);
+        sap.m.MessageBox.confirm(
+          "Are you sure you want to regenerate this response?",
+          {
+            onClose: (oAction) => {
+              if (oAction === sap.m.MessageBox.Action.OK) {
+                const oModel = this.getView().getModel();
+                const oActionBinding = oModel.bindContext(
+                  "/regenerateMessage(...)",
+                );
+                oActionBinding.setParameter("messageId", sId);
 
-              this.getView().byId("chatPage").setBusy(true);
+                this.getView().byId("chatPage").setBusy(true);
 
-              oActionBinding.execute().then(() => {
-                MessageToast.show("Message regenerated successfully");
-                oModel.refresh();
-                this.getView().byId("chatPage").setBusy(false);
-              }).catch((oError) => {
-                MessageToast.show("Error regenerating message: " + oError.message);
-                this.getView().byId("chatPage").setBusy(false);
-              });
-            }
-          }
-        });
+                oActionBinding
+                  .execute()
+                  .then(() => {
+                    MessageToast.show("Message regenerated successfully");
+                    oModel.refresh();
+                    this.getView().byId("chatPage").setBusy(false);
+                  })
+                  .catch((oError) => {
+                    MessageToast.show(
+                      "Error regenerating message: " + oError.message,
+                    );
+                    this.getView().byId("chatPage").setBusy(false);
+                  });
+              }
+            },
+          },
+        );
       },
     });
   },
